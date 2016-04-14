@@ -8,7 +8,7 @@ public class Main
 	public static void main(String argv[])
 	{
 //		Filemonitor fm=new Filemonitor(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test");
-		Filemonitor fm=new Filemonitor(Trigger_kinds.path_changed,"C:\\Users\\DESTR\\Desktop\\test\\123");
+		Filemonitor fm=new Filemonitor(Trigger_kinds.size_changed,"C:\\Users\\DESTR\\Desktop\\test\\123\\");
 //		Thread T=new Thread(fm);
 //		T.run();
 //		try
