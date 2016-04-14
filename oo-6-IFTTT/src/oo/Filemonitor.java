@@ -1,5 +1,6 @@
 package oo;
 
+import javafx.scene.control.TableRow;
 import javafx.util.Pair;
 import javafx.util.converter.BooleanStringConverter;
 
@@ -23,6 +24,7 @@ public class Filemonitor implements Runnable
 	private Map<String, Boolean> f_bo;
 	private int trigger;
 	private boolean target_is_file;
+	private int action;
 
 	public Filemonitor(int x, String target)
 	{
@@ -131,7 +133,7 @@ public class Filemonitor implements Runnable
 			long size = 0;
 			for (File i : temp_file.listFiles())
 			{
-				size += update_folder_size(i.getAbsolutePath());
+				size += get_folder_size(i.getAbsolutePath());
 			}
 			return size;
 		}
@@ -388,9 +390,19 @@ public class Filemonitor implements Runnable
 											&& !target_file.exists())    //原文件不存在
 									{
 										//判定为renamed
-										//if (this.trigger == Trigger_kinds.renamed)
-										System.out.println("renamed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
-										target_file = temp;
+										if (this.trigger == Trigger_kinds.renamed)
+										{
+											System.out.println("renamed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
+											if (this.action == Action_kind.recover)
+											{
+												_file temp_file = new _file();
+												temp_file.move_file(temp.getAbsolutePath(), target_file.getAbsolutePath());
+											}
+											else
+												target_file = temp;
+										}
+										else
+											target_file = temp;
 									}
 								}
 							}
@@ -419,7 +431,7 @@ public class Filemonitor implements Runnable
 						}
 					}
 					////////////////////////////modified////////////////////////////////
-					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
+					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE && this.trigger == Trigger_kinds.modified)
 					{
 						if (target_is_file)
 						{
@@ -430,7 +442,6 @@ public class Filemonitor implements Runnable
 									if (temp.getAbsolutePath().equals(target_file.getAbsolutePath()))   //文件名相同
 									{
 										//判定为modified
-										//if (this.trigger == Trigger_kinds.modified)
 										System.out.println("modified:\t" + target_file.getAbsolutePath());
 										target_file = temp;
 									}
@@ -449,8 +460,7 @@ public class Filemonitor implements Runnable
 										if (temp.getAbsolutePath().equals(target_file.getAbsolutePath()))   //文件名相同
 										{
 											//判定为modified
-											if (this.trigger == Trigger_kinds.modified)
-												System.out.println("modified:\t" + target_file.getAbsolutePath());
+											System.out.println("modified:\t" + target_file.getAbsolutePath());
 											target_file = temp;
 										}
 									}
@@ -471,8 +481,8 @@ public class Filemonitor implements Runnable
 									if (temp.getName().equals(target_file.getName()))   //文件名相同
 									{
 										//判定为path-changed
-										//if (this.trigger == Trigger_kinds.path_changed)
-										System.out.println("path-changed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
+										if (this.trigger == Trigger_kinds.path_changed)
+											System.out.println("path-changed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
 										target_file = temp;
 									}
 								}
@@ -502,28 +512,13 @@ public class Filemonitor implements Runnable
 						}
 					}
 					////////////////////////////size-changed////////////////////////////////
-					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
+					if (this.trigger == Trigger_kinds.size_changed)
 					{
-						if (target_is_file)
+						if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
 						{
-							if (temp.getAbsolutePath().equals(target_file.getAbsolutePath()) && fList.containsKey(target_file.getAbsolutePath()))    //文件名相同
+							if (target_is_file)
 							{
-								if (temp.length() != fList.get(target_file.getAbsolutePath()).getValue())   //大小不相同
-								{
-
-									//判定为size-changed
-									System.out.println("size-changed:\t" + target_file.getAbsolutePath());
-									target_file = temp;
-
-								}
-							}
-						}
-						else
-						{
-							for (String iter : fList.keySet())
-							{
-								target_file = new File(iter);
-								if (temp.getAbsolutePath().equals(target_file.getAbsolutePath()))    //文件名相同
+								if (temp.getAbsolutePath().equals(target_file.getAbsolutePath()) && fList.containsKey(target_file.getAbsolutePath()))    //文件名相同
 								{
 									if (temp.length() != fList.get(target_file.getAbsolutePath()).getValue())   //大小不相同
 									{
@@ -535,33 +530,50 @@ public class Filemonitor implements Runnable
 									}
 								}
 							}
-							if (!fList.containsKey(temp.getAbsolutePath()))
+							else
 							{
-								//判定为size-changed
-								System.out.println("size-changed:\t" + temp.getAbsolutePath());
-								target_file = temp;
+								for (String iter : fList.keySet())
+								{
+									target_file = new File(iter);
+									if (temp.getAbsolutePath().equals(target_file.getAbsolutePath()))    //文件名相同
+									{
+										if (temp.length() != fList.get(target_file.getAbsolutePath()).getValue())   //大小不相同
+										{
+
+											//判定为size-changed
+											System.out.println("size-changed:\t" + target_file.getAbsolutePath());
+											target_file = temp;
+
+										}
+									}
+								}
+								if (!fList.containsKey(temp.getAbsolutePath()))
+								{
+									//判定为size-changed
+									System.out.println("size-changed:\t" + temp.getAbsolutePath());
+									target_file = temp;
+								}
 							}
 						}
-					}
-					if (temp.isDirectory())
-					{
-						long temp_size = get_folder_size(temp.getAbsolutePath());
-						if (fList.containsKey(temp.getAbsolutePath()))
+						if (temp.isDirectory())
 						{
-							if (temp_size != fList.get(temp.getAbsolutePath()).getValue())
+							long temp_size = get_folder_size(temp.getAbsolutePath());
+							if (fList.containsKey(temp.getAbsolutePath()))
 							{
-								System.out.println("size-changed:\t" + temp.getAbsolutePath());
-								fList.put(temp.getAbsolutePath(), new Pair<Long, Long>(temp.lastModified(), temp_size));
-								System.out.println(temp_size);
+								if (temp_size != fList.get(temp.getAbsolutePath()).getValue())
+								{
+									System.out.println("size-changed:\t" + temp.getAbsolutePath());
+									fList.put(temp.getAbsolutePath(), new Pair<Long, Long>(temp.lastModified(), temp_size));
+									System.out.println(temp_size);
+								}
 							}
+
 						}
-
+						if (!temp.exists())
+						{
+							System.out.println("size-changed:\t" + temp.getAbsolutePath());
+						}
 					}
-					if(!temp.exists())
-					{
-						System.out.println("size-changed:\t" + temp.getAbsolutePath());
-					}
-
 					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
 					{
 //					System.out.println("123");
