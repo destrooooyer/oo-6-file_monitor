@@ -1,6 +1,0 @@
-path-changed count:	1
-path-changed count:	2
-path-changed count:	3
-path-changed count:	4
-path-changed count:	5
-path-changed count:	6
