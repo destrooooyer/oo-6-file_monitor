@@ -17,6 +17,10 @@ public class Main
 		Thread T_summary = new Thread(sm);
 		T_summary.start();
 
+		Detail dt=new Detail();
+		Thread T_detail=new Thread(dt);
+		T_detail.start();
+
 
 		Pattern pt = Pattern.compile("IF\\s+\"(.*)\"\\s+(renamed|modified|path-changed|size-changed)\\s+THEN\\s+(record-summary|recover|record-detail)");
 		String str_input;
@@ -87,6 +91,8 @@ public class Main
 				}
 			}
 		}
+		Filemonitor2 fm=new Filemonitor2(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test\\123\\a.txt",sm,dt);
+		fm.test();
 
 //		Filemonitor fm=new Filemonitor(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test");
 //		Filemonitor fm = new Filemonitor(Trigger_kinds.path_changed, "C:\\Users\\DESTR\\Desktop\\test\\123\\a.txt", sm);
