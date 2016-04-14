@@ -7,8 +7,11 @@ public class Main
 {
 	public static void main(String argv[])
 	{
+		Summary sm=new Summary();
+		Thread T_summary=new Thread(sm);
+		T_summary.start();
 //		Filemonitor fm=new Filemonitor(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test");
-		Filemonitor fm=new Filemonitor(Trigger_kinds.size_changed,"C:\\Users\\DESTR\\Desktop\\test\\123\\");
+		Filemonitor fm=new Filemonitor(Trigger_kinds.path_changed,"C:\\Users\\DESTR\\Desktop\\test\\123\\a.txt",sm);
 //		Thread T=new Thread(fm);
 //		T.run();
 //		try

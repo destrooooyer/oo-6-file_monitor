@@ -25,8 +25,9 @@ public class Filemonitor implements Runnable
 	private int trigger;
 	private boolean target_is_file;
 	private int action;
+	private Summary sm;
 
-	public Filemonitor(int x, String target)
+	public Filemonitor(int x, String target, Summary sm)
 	{
 		//这货记录根目录下所有文件和其修改时间以及大小
 		fList = new HashMap<String, Pair<Long, Long>>();
@@ -40,6 +41,9 @@ public class Filemonitor implements Runnable
 			this.root = new String(target_file.getParent());
 		else
 			this.root = new String(target_file.getAbsolutePath());
+		this.sm = sm;
+
+		this.action = Action_kind.record_summary;
 
 	}
 
@@ -393,42 +397,61 @@ public class Filemonitor implements Runnable
 										if (this.trigger == Trigger_kinds.renamed)
 										{
 											System.out.println("renamed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
+											//-------------recover------------------
 											if (this.action == Action_kind.recover)
 											{
+												try
+												{
+													Thread.sleep(1);
+												}
+												catch (InterruptedException e)
+												{
+													e.printStackTrace();
+												}
 												_file temp_file = new _file();
-												temp_file.move_file(temp.getAbsolutePath(), target_file.getAbsolutePath());
+												temp_file.rename_file(temp.getAbsolutePath(), target_file.getAbsolutePath());
 											}
 											else
 												target_file = temp;
+
+											//------------record_summary-----------------
+											if (this.action == Action_kind.record_summary)
+											{
+												sm.Path_changed_count_plus();
+											}
 										}
 										else
 											target_file = temp;
+
 									}
 								}
 							}
 						}
-						else
-						{
-							for (String iter : fList.keySet())
-							{
-								target_file = new File(iter);
-								if (temp.getParent().equals(target_file.getParent()))    //所处路径相同
-								{
-									if (temp.lastModified() == fList.get(target_file.getAbsolutePath()).getKey() &&   //最后修改时间相同
-											temp.length() == fList.get(target_file.getAbsolutePath()).getValue())   //大小相同
-									{
-										if (!temp.getAbsolutePath().equals(target_file.getAbsolutePath())   //文件名不相同
-												&& !target_file.exists())    //原文件不存在
-										{
-											//判定为renamed
-											if (this.trigger == Trigger_kinds.renamed)
-												System.out.println("renamed:\t" + iter + "\t=>\t" + temp.getAbsolutePath());
-											target_file = temp;
-										}
-									}
-								}
-							}
-						}
+						//----------------------renamed不支持监视目录-------------------------
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//						else
+//						{
+//							for (String iter : fList.keySet())
+//							{
+//								target_file = new File(iter);
+//								if (temp.getParent().equals(target_file.getParent()))    //所处路径相同
+//								{
+//									if (temp.lastModified() == fList.get(target_file.getAbsolutePath()).getKey() &&   //最后修改时间相同
+//											temp.length() == fList.get(target_file.getAbsolutePath()).getValue())   //大小相同
+//									{
+//										if (!temp.getAbsolutePath().equals(target_file.getAbsolutePath())   //文件名不相同
+//												&& !target_file.exists())    //原文件不存在
+//										{
+//											//判定为renamed
+//											if (this.trigger == Trigger_kinds.renamed)
+//												System.out.println("renamed:\t" + iter + "\t=>\t" + temp.getAbsolutePath());
+//											target_file = temp;
+//										}
+//									}
+//								}
+//							}
+//						}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					}
 					////////////////////////////modified////////////////////////////////
 					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE && this.trigger == Trigger_kinds.modified)
@@ -444,6 +467,11 @@ public class Filemonitor implements Runnable
 										//判定为modified
 										System.out.println("modified:\t" + target_file.getAbsolutePath());
 										target_file = temp;
+										//------------record_summary-----------------
+										if (this.action == Action_kind.record_summary)
+										{
+											sm.Modified_count_plus();
+										}
 									}
 								}
 							}
@@ -462,6 +490,11 @@ public class Filemonitor implements Runnable
 											//判定为modified
 											System.out.println("modified:\t" + target_file.getAbsolutePath());
 											target_file = temp;
+											//------------record_summary-----------------
+											if (this.action == Action_kind.record_summary)
+											{
+												sm.Modified_count_plus();
+											}
 										}
 									}
 								}
@@ -482,34 +515,63 @@ public class Filemonitor implements Runnable
 									{
 										//判定为path-changed
 										if (this.trigger == Trigger_kinds.path_changed)
-											System.out.println("path-changed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
-										target_file = temp;
-									}
-								}
-							}
-						}
-						else
-						{
-							for (String iter : fList.keySet())
-							{
-								target_file = new File(iter);
-								if (!temp.getParent().equals(target_file.getParent()))    //所处路径不相同
-								{
-									if (temp.lastModified() == fList.get(target_file.getAbsolutePath()).getKey() &&   //最后修改时间相同
-											temp.length() == fList.get(target_file.getAbsolutePath()).getValue())   //大小相同
-									{
-										if (temp.getName().equals(target_file.getName()) &&   //文件名相同
-												temp.exists() && !target_file.exists()) //一个存在一个消失
 										{
-											//判定为path-changed
-											if (this.trigger == Trigger_kinds.path_changed)
-												System.out.println("path-changed:\t" + iter + "\t=>\t" + temp.getAbsolutePath());
-											target_file = temp;
+											//System.out.println("path-changed:\t" + target_file.getAbsolutePath() + "\t=>\t" + temp.getAbsolutePath());
+
+											//-------------recover------------------
+											if (this.action == Action_kind.recover)
+											{
+												try
+												{
+													Thread.sleep(1);
+												}
+												catch (InterruptedException e)
+												{
+													e.printStackTrace();
+												}
+												_file temp_file = new _file();
+												temp_file.move_file(temp.getAbsolutePath(), target_file.getAbsolutePath());
+											}
+											else
+												target_file = temp;
+
+											//------------record_summary-----------------
+											if (this.action == Action_kind.record_summary)
+											{
+												sm.Path_changed_count_plus();
+											}
 										}
+										else
+											target_file = temp;
 									}
 								}
 							}
 						}
+						//-----------------------path_changed不支持监视目录---------------------
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//						else
+//						{
+//							for (String iter : fList.keySet())
+//							{
+//								target_file = new File(iter);
+//								if (!temp.getParent().equals(target_file.getParent()))    //所处路径不相同
+//								{
+//									if (temp.lastModified() == fList.get(target_file.getAbsolutePath()).getKey() &&   //最后修改时间相同
+//											temp.length() == fList.get(target_file.getAbsolutePath()).getValue())   //大小相同
+//									{
+//										if (temp.getName().equals(target_file.getName()) &&   //文件名相同
+//												temp.exists() && !target_file.exists()) //一个存在一个消失
+//										{
+//											//判定为path-changed
+//											if (this.trigger == Trigger_kinds.path_changed)
+//												System.out.println("path-changed:\t" + iter + "\t=>\t" + temp.getAbsolutePath());
+//											target_file = temp;
+//										}
+//									}
+//								}
+//							}
+//						}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					}
 					////////////////////////////size-changed////////////////////////////////
 					if (this.trigger == Trigger_kinds.size_changed)
@@ -574,6 +636,8 @@ public class Filemonitor implements Runnable
 							System.out.println("size-changed:\t" + temp.getAbsolutePath());
 						}
 					}
+
+
 					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE)
 					{
 //					System.out.println("123");
