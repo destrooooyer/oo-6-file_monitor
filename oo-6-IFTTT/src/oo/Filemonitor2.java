@@ -22,7 +22,7 @@ public class Filemonitor2 implements Runnable
 	private Detail dt;
 	private int run_flag;
 
-	public Filemonitor2(int x, String target, Summary sm, Detail dt)
+	public Filemonitor2(int x, String target, Summary sm, Detail dt,int y)
 	{
 		//用来记录工作区下所有文件和其修改时间以及大小
 		fmap_pres = new HashMap<File, Pair<Long, Long>>();
@@ -42,31 +42,44 @@ public class Filemonitor2 implements Runnable
 
 		this.run_flag = 1;
 
-		this.action = Action_kind.recover;
+		this.action = y;
+
+		synchronized (_file.lock)
+		{
+			init();
+		}
 
 	}
 
 	public long update(File file)
 	{
-
-		if (file.isDirectory())
+		try
 		{
-			long temp_size = 0;
-			for (File i : file.listFiles())
+			if (file.isDirectory())
 			{
-				temp_size += update(i);
+				long temp_size = 0;
+				for (File i : file.listFiles())
+				{
+					temp_size += update(i);
+				}
+				fmap_pres.put(file, new Pair<Long, Long>(file.lastModified(), temp_size));
+				return 0;
 			}
-			fmap_pres.put(file, new Pair<Long, Long>(file.lastModified(), temp_size));
-			return 0;
+			else
+			{
+				fmap_pres.put(file, new Pair<Long, Long>(file.lastModified(), file.length()));
+				return file.length();
+			}
 		}
-		else
+		catch (Exception e)
 		{
-			fmap_pres.put(file, new Pair<Long, Long>(file.lastModified(), file.length()));
-			return file.length();
+			System.out.println("要监测的路径下可能包含没有访问权限的文件或文件夹，该线程结束");
+			this.run_flag=0;
+			return 123;
 		}
 	}
 
-	public void init()
+	private void init()
 	{
 		update(root);
 		this.fmap_prev.putAll(fmap_pres);
@@ -75,18 +88,14 @@ public class Filemonitor2 implements Runnable
 	@Override
 	public void run()
 	{
-
-	}
-
-	public void test()
-	{
-		init();
-		System.out.println("ready");
 		while (this.run_flag == 1)
 		{
 			//更新present
 			fmap_pres.clear();
-			update(root);
+			synchronized (_file.lock)
+			{
+				update(root);
+			}
 //			for(int i=0;i<5;i++)
 //			{
 //				fmap_pres.clear();
@@ -262,7 +271,7 @@ public class Filemonitor2 implements Runnable
 						return;
 					}
 				}
-				else
+				else if(fmap_prev.containsKey(target))
 				{
 					String target_path = target.getAbsolutePath();
 					long target_lastmodified = fmap_prev.get(target).getKey();
@@ -419,7 +428,7 @@ public class Filemonitor2 implements Runnable
 									}
 									case Action_kind.record_summary:
 									{
-										sm.Modified_count_plus();
+										sm.Size_changed_count_plus();
 										//target = i;
 										break;
 									}
@@ -449,7 +458,7 @@ public class Filemonitor2 implements Runnable
 								}
 								case Action_kind.record_summary:
 								{
-									sm.Modified_count_plus();
+									sm.Size_changed_count_plus();
 									//target = i;
 									break;
 								}
@@ -481,7 +490,7 @@ public class Filemonitor2 implements Runnable
 								}
 								case Action_kind.record_summary:
 								{
-									sm.Modified_count_plus();
+									sm.Size_changed_count_plus();
 									//target = i;
 									break;
 								}
@@ -500,12 +509,11 @@ public class Filemonitor2 implements Runnable
 							if (i.getParent().equals(j.getParent()) &&                                    //所处路径相同
 									fmap_prev.get(i).getKey().equals(fmap_pres.get(j).getKey()) &&      //最后修改时间相同
 									fmap_prev.get(i).getValue().equals(fmap_pres.get(j).getValue()) &&    //大小相同
-									i.isDirectory() == false &&                                        //不是文件夹
+									!j.isDirectory()&&                                        //不是文件夹
 									!i.getName().equals(j.getName()) &&                                //文件名不同
 									!fmap_prev.containsKey(j) &&                                            //prev不包含新的
 									!fmap_pres.containsKey(i))                                          //pres不含旧的
 							{
-
 								switch (this.action)
 								{
 									case Action_kind.record_detail:
@@ -563,7 +571,7 @@ public class Filemonitor2 implements Runnable
 							if (!i.getParent().equals(j.getParent()) &&                                    //所处路径不同
 									fmap_prev.get(i).getKey().equals(fmap_pres.get(j).getKey()) &&      //最后修改时间相同
 									fmap_prev.get(i).getValue().equals(fmap_pres.get(j).getValue()) &&    //大小相同
-									i.isDirectory() == false &&                                        //不是文件夹
+									j.isDirectory() == false &&                                        //不是文件夹
 									i.getName().equals(j.getName()) &&                                //文件名同
 									!fmap_prev.containsKey(j) &&                                            //prev不包含新的
 									!fmap_pres.containsKey(i))                                          //pres不含旧的
@@ -589,7 +597,7 @@ public class Filemonitor2 implements Runnable
 									}
 									case Action_kind.record_summary:
 									{
-										sm.Renamed_count_plus();
+										sm.Path_changed_count_plus();
 										break;
 									}
 									case Action_kind.recover:
@@ -634,6 +642,12 @@ public class Filemonitor2 implements Runnable
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void test()
+	{
+
+
 	}
 
 

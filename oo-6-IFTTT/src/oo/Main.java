@@ -2,6 +2,7 @@ package oo;
 
 import java.io.File;
 import java.util.Scanner;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,8 @@ public class Main
 		Detail dt=new Detail();
 		Thread T_detail=new Thread(dt);
 		T_detail.start();
+
+		Vector<Filemonitor2> fms=new Vector<Filemonitor2>();
 
 
 		Pattern pt = Pattern.compile("IF\\s+\"(.*)\"\\s+(renamed|modified|path-changed|size-changed)\\s+THEN\\s+(record-summary|recover|record-detail)");
@@ -76,11 +79,7 @@ public class Main
 						}
 						else
 						{
-							////////////////////////////////////////////////////////////////////////////////////////////
-							////////////////////////////////////////////////////////////////////////////////////////////
-							//创建filemonitor
-							////////////////////////////////////////////////////////////////////////////////////////////
-							////////////////////////////////////////////////////////////////////////////////////////////
+							fms.add(new Filemonitor2(trigger_kind,file.getAbsolutePath(),sm,dt,action_kind));
 						}
 					}
 
@@ -91,21 +90,35 @@ public class Main
 				}
 			}
 		}
-		Filemonitor2 fm=new Filemonitor2(Trigger_kinds.path_changed,"C:\\Users\\DESTR\\Desktop\\test\\123",sm,dt);
-		fm.test();
 
-//		Filemonitor fm=new Filemonitor(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test");
-//		Filemonitor fm = new Filemonitor(Trigger_kinds.path_changed, "C:\\Users\\DESTR\\Desktop\\test\\123\\a.txt", sm);
-//		Thread T=new Thread(fm);
-//		T.run();
-//		try
-//		{
-//			T.join();
-//		}
-//		catch (InterruptedException e)
-//		{
-//			e.printStackTrace();
-//		}
-//		fm.test();
+		Vector<Thread> T=new Vector<Thread>();
+		for(int i=0;i<fms.size();i++)
+		{
+			T.add(new Thread(fms.get(i)));
+			T.get(i).start();
+		}
+
+		try
+		{
+			Thread.sleep(2000);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//在此处启动测试线程
+		Test test=new Test();
+		Thread T_test=new Thread(test);
+		T_test.start();
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	}
 }
