@@ -12,7 +12,6 @@ public class _file
 		File temp = new File(str);
 		if (temp.exists())
 		{
-			System.out.println(str + "已经存在了，创建失败");
 			return false;
 		}
 		else
@@ -51,7 +50,6 @@ public class _file
 		}
 		else
 		{
-			System.out.println(str + "不存在，删除失败");
 			return false;
 		}
 		return true;
@@ -65,7 +63,6 @@ public class _file
 			File newfile = new File(dest);
 			if (newfile.exists())
 			{
-				System.out.println(dest + "已经存在！");
 				return false;
 			}
 			else

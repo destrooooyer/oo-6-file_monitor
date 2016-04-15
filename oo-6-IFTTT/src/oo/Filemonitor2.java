@@ -42,7 +42,7 @@ public class Filemonitor2 implements Runnable
 
 		this.run_flag = 1;
 
-		this.action = Action_kind.record_detail;
+		this.action = Action_kind.recover;
 
 	}
 
@@ -470,9 +470,9 @@ public class Filemonitor2 implements Runnable
 									str_detail += "路径变化:\t";
 									str_detail += "新建\t" + i.getAbsolutePath() + "\n";
 									str_detail += "修改时间变化:\t";
-									str_detail += "0\t=>\t" + fmap_prev.get(i).getKey().toString() + "\n";
+									str_detail += "0\t=>\t" + fmap_pres.get(i).getKey().toString() + "\n";
 									str_detail += "文件大小变化:\t";
-									str_detail += "0\t=>\t" + fmap_prev.get(i).getValue().toString() + "\n";
+									str_detail += "0\t=>\t" + fmap_pres.get(i).getValue().toString() + "\n";
 									str_detail += "//////////////////////////////////////////////////////////////////////";
 									System.out.println(str_detail);
 									dt.push_back(str_detail);
@@ -490,63 +490,128 @@ public class Filemonitor2 implements Runnable
 						}
 					}
 				}
-
-				else
+				//----------------------------------renamed-------------------------------------------------------------
+				else if (this.trigger == Trigger_kinds.renamed)
 				{
 					for (File i : fmap_prev.keySet())
 					{
 						for (File j : fmap_pres.keySet())
 						{
-							//----------------------------------renamed-----------------------------------------------------
 							if (i.getParent().equals(j.getParent()) &&                                    //所处路径相同
 									fmap_prev.get(i).getKey().equals(fmap_pres.get(j).getKey()) &&      //最后修改时间相同
 									fmap_prev.get(i).getValue().equals(fmap_pres.get(j).getValue()) &&    //大小相同
 									i.isDirectory() == false &&                                        //不是文件夹
 									!i.getName().equals(j.getName()) &&                                //文件名不同
-									!fmap_prev.containsKey(j))                                            //previous不包含
+									!fmap_prev.containsKey(j) &&                                            //prev不包含新的
+									!fmap_pres.containsKey(i))                                          //pres不含旧的
 							{
-								if (this.trigger == Trigger_kinds.renamed)
+
+								switch (this.action)
 								{
-									switch (this.action)
+									case Action_kind.record_detail:
 									{
-										case Action_kind.record_detail:
-										{
-											String str_detail = new String();
-											str_detail += "renamed:\n";
-											str_detail += "路径变化:\t";
-											str_detail += i.getAbsolutePath() + "\t=>\t" + j.getAbsolutePath() + "\n";
-											str_detail += "修改时间变化:\t";
-											str_detail += fmap_prev.get(i).getKey().toString() + "\t=>\t" + fmap_pres.get(j).getKey() + "\n";
-											str_detail += "文件大小变化:\t";
-											str_detail += fmap_prev.get(i).getValue().toString() + "\t=>\t" + fmap_pres.get(j).getValue() + "\n";
-											str_detail += "//////////////////////////////////////////////////////////////////////";
-											System.out.println(str_detail);
-											dt.push_back(str_detail);
-											target = i;
-											break;
-										}
-										case Action_kind.record_summary:
-										{
-											sm.Renamed_count_plus();
-											break;
-										}
-										case Action_kind.recover:
-										{
-											try
-											{
-												Thread.sleep(10);
-											}
-											catch (InterruptedException e)
-											{
-												e.printStackTrace();
-											}
-											_file temp_file = new _file();
-											temp_file.rename_file(j.getAbsolutePath(), i.getAbsolutePath());
-											break;
-										}
-										default:
+										String str_detail = new String();
+										str_detail += "renamed:\n";
+										str_detail += "路径变化:\t";
+										str_detail += i.getAbsolutePath() + "\t=>\t" + j.getAbsolutePath() + "\n";
+										str_detail += "修改时间变化:\t";
+										str_detail += fmap_prev.get(i).getKey().toString() + "\t=>\t" + fmap_pres.get(j).getKey() + "\n";
+										str_detail += "文件大小变化:\t";
+										str_detail += fmap_prev.get(i).getValue().toString() + "\t=>\t" + fmap_pres.get(j).getValue() + "\n";
+										str_detail += "//////////////////////////////////////////////////////////////////////";
+										System.out.println(str_detail);
+										dt.push_back(str_detail);
+										target = i;
+										break;
 									}
+									case Action_kind.record_summary:
+									{
+										sm.Renamed_count_plus();
+										break;
+									}
+									case Action_kind.recover:
+									{
+										try
+										{
+											Thread.sleep(10);
+										}
+										catch (InterruptedException e)
+										{
+											e.printStackTrace();
+										}
+										_file temp_file = new _file();
+										temp_file.rename_file(j.getAbsolutePath(), i.getAbsolutePath());
+										fmap_pres.remove(j);
+										fmap_pres.put(i, fmap_prev.get(i));
+										break;
+									}
+									default:
 								}
+								break;
+
+							}
+						}
+					}
+				}
+				//----------------------------------path_changed--------------------------------------------------------
+				else if (this.trigger == Trigger_kinds.path_changed)
+				{
+					for (File i : fmap_prev.keySet())
+					{
+						for (File j : fmap_pres.keySet())
+						{
+							if (!i.getParent().equals(j.getParent()) &&                                    //所处路径不同
+									fmap_prev.get(i).getKey().equals(fmap_pres.get(j).getKey()) &&      //最后修改时间相同
+									fmap_prev.get(i).getValue().equals(fmap_pres.get(j).getValue()) &&    //大小相同
+									i.isDirectory() == false &&                                        //不是文件夹
+									i.getName().equals(j.getName()) &&                                //文件名同
+									!fmap_prev.containsKey(j) &&                                            //prev不包含新的
+									!fmap_pres.containsKey(i))                                          //pres不含旧的
+							{
+
+								switch (this.action)
+								{
+									case Action_kind.record_detail:
+									{
+										String str_detail = new String();
+										str_detail += "path-changed:\n";
+										str_detail += "路径变化:\t";
+										str_detail += i.getAbsolutePath() + "\t=>\t" + j.getAbsolutePath() + "\n";
+										str_detail += "修改时间变化:\t";
+										str_detail += fmap_prev.get(i).getKey().toString() + "\t=>\t" + fmap_pres.get(j).getKey() + "\n";
+										str_detail += "文件大小变化:\t";
+										str_detail += fmap_prev.get(i).getValue().toString() + "\t=>\t" + fmap_pres.get(j).getValue() + "\n";
+										str_detail += "//////////////////////////////////////////////////////////////////////";
+										System.out.println(str_detail);
+										dt.push_back(str_detail);
+										target = i;
+										break;
+									}
+									case Action_kind.record_summary:
+									{
+										sm.Renamed_count_plus();
+										break;
+									}
+									case Action_kind.recover:
+									{
+										try
+										{
+											Thread.sleep(10);
+										}
+										catch (InterruptedException e)
+										{
+											e.printStackTrace();
+										}
+										_file temp_file = new _file();
+										temp_file.rename_file(j.getAbsolutePath(), i.getAbsolutePath());
+										fmap_pres.remove(j);
+										fmap_pres.put(i, fmap_prev.get(i));
+										break;
+									}
+									default:
+								}
+								break;
+
 							}
 						}
 					}
