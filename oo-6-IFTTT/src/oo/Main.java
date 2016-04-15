@@ -91,7 +91,7 @@ public class Main
 				}
 			}
 		}
-		Filemonitor2 fm=new Filemonitor2(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test\\123\\a.txt",sm,dt);
+		Filemonitor2 fm=new Filemonitor2(Trigger_kinds.modified,"C:\\Users\\DESTR\\Desktop\\test\\123\\",sm,dt);
 		fm.test();
 
 //		Filemonitor fm=new Filemonitor(Trigger_kinds.renamed,"C:\\Users\\DESTR\\Desktop\\test");
