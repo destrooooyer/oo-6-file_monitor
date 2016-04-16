@@ -249,7 +249,8 @@ public class _file
 				long size = 0;
 				for (File i : temp_file.listFiles())
 				{
-					size += get_size(i.getAbsolutePath());
+					if (i.isFile())
+						size += i.length();
 				}
 				return size;
 			}
@@ -261,6 +262,33 @@ public class _file
 		{
 			System.out.println("获取文件大小失败，请输入正确的参数");
 			return -1;
+		}
+	}
+
+	public boolean file_append(String str)
+	{
+		synchronized (lock)
+		{
+			try
+			{
+				File temp_file = new File(str);
+				if(temp_file.exists())
+				{
+					FileWriter fw = new FileWriter(temp_file);
+					fw.append("wtf");
+				}
+				else
+				{
+					System.out.println("文件不存在，写入失败");
+					return false;
+				}
+				return true;
+			}
+			catch (Exception e)
+			{
+				System.out.println("文件写入失败，请输入正确的参数");
+				return false;
+			}
 		}
 	}
 
