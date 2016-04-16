@@ -64,7 +64,7 @@ public class Detail implements Runnable
 				{
 					try
 					{
-						fout.write(dt.removeFirst() + "\n");
+						fout.write(dt.removeFirst() + "\r\n");
 						fout.flush();
 					}
 					catch (IOException e)

@@ -114,7 +114,7 @@ public class Summary implements Runnable
 			{
 				try
 				{
-					fout.write(sm.removeFirst() + "\n");
+					fout.write(sm.removeFirst() + "\r\n");
 					fout.flush();
 				}
 				catch (IOException e)
