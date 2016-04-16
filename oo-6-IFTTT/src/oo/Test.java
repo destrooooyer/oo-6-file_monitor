@@ -8,35 +8,119 @@ public class Test implements Runnable
 	@Override
 	public void run()
 	{
-		_file file=new _file();
-		//file.create_file("C:\\Users\\DESTR\\Desktop\\test\\123\\zxc");
-		//file.create_file(null);
-		//file.create_file("C:\\Users\\DESTR\\Desktop\\test\\123\\zxc");
-//		file.delete_file("C:\\Users\\DESTR\\Desktop\\test\\123\\123");
-//		file.rename_file("C:\\Users\\DESTR\\Desktop\\test\\123\\新建文件夹 (3)","C:\\Users\\DESTR\\Desktop\\test\\123\\新建");
-//		file.delete_file("C:\\Users\\DESTR\\Desktop\\test\\123\\新建文件夹 (3)");
-//		file.copy_file("bug记录.txt","123");
-//		file.copy_file("bug记录.txt","asd (2).bak");
-//		file.create_dir("C:\\Users\\DESTR\\Desktop\\test\\123\\12");
-//		file.move_file("C:\\Users\\DESTR\\Desktop\\test\\123\\123","C:\\Users\\DESTR\\Desktop\\test\\123\\12\\bug记录.txt");
+		_file file = new _file();
+//		System.out.println(123);
+//		file.create_dir("E:\\test\\123\\testdir");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//		System.out.println(123);
+//
+//
+//		file.move_file("E:\\test\\123\\asd (2).bak", "E:\\test\\123\\testdir\\asd (2).bak");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//		System.out.println(123);
+//
+//		file.create_file("E:\\test\\123\\testdir\\testfile.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//
+//		System.out.println(123);
+//		file.file_append("E:\\test\\123\\testdir\\testfile.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//
+//		file.delete_file("E:\\test\\123\\testdir\\testfile.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//
+//		file.rename_file("E:\\test\\123\\testdir\\asd (2).bak", "E:\\test\\123\\testdir\\test.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//
+//		file.move_file("E:\\test\\123\\testdir\\test.txt", "E:\\test\\123\\test.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//
+//		file.delete_file("E:\\test\\123\\test.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//		file.file_append("E:\\test\\123\\test.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//		file.move_file("E:\\test\\123\\test.txt","E:\\test\\123\\testdir\\test.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
+//		file.delete_file("E:\\test\\123\\test.txt");
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//			e.printStackTrace();
+//		}
 
-//		System.out.println(file.get_last_modified("C:\\Users\\DESTR\\Desktop\\test\\123"));
-//		file.file_append("C:\\Users\\DESTR\\Desktop\\test\\123\\123");
-//		file.move_file("C:\\Users\\DESTR\\Desktop\\test\\123\\123","C:\\Users\\DESTR\\Desktop\\test\\123\\src\\123");
-//		System.out.println(file.get_last_modified("C:\\Users\\DESTR\\Desktop\\test\\123"));
-
-		while (true)
-		{
-			file.move_file("C:\\Users\\DESTR\\Desktop\\test\\123\\123.bak", "C:\\Users\\DESTR\\Desktop\\test\\123\\src\\123.bak");
-			try
-			{
-				Thread.sleep(1000);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
 
 	}
 

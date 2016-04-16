@@ -103,12 +103,17 @@ public class _file
 							}
 						}
 						if (!temp.delete())
+						{
 							System.out.println("删除失败");
+							return false;
+						}
+						return true;
 					}
 					else
 					{
 						if (!temp.delete())
 							System.out.println("删除失败");
+						return false;
 					}
 				}
 				else
@@ -116,7 +121,6 @@ public class _file
 					System.out.println("文件或目录不存在");
 					return false;
 				}
-				return true;
 			}
 			catch (Exception e)
 			{
