@@ -112,8 +112,12 @@ public class _file
 					else
 					{
 						if (!temp.delete())
+						{
 							System.out.println("删除失败");
-						return false;
+							return false;
+						}
+						else
+							return true;
 					}
 				}
 				else

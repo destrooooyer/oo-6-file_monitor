@@ -8,7 +8,7 @@ public class Test implements Runnable
 	@Override
 	public void run()
 	{
-		_file file = new _file();
+//		_file file = new _file();
 //		System.out.println(123);
 //		file.create_dir("E:\\test\\123\\testdir");
 //		try
