@@ -637,7 +637,7 @@ public class Filemonitor2 implements Runnable
 
 				try
 				{
-					Thread.sleep(1000);
+					Thread.sleep(1);
 				}
 				catch (InterruptedException e)
 				{
